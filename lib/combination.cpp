@@ -41,13 +41,13 @@ struct Comb
   long long p(int n, int k)
   {
     if (n < k || k < 0) return 0;
-    resize(n + 2);
+    resize(n + 1);
     return fac[n] * finv[n - k] % mod;
   }
   long long c(int n, int k)
   {
     if (n < k || k < 0) return 0;
-    resize(n + 2);
+    resize(n + 1);
     return fac[n] * finv[k] % mod * finv[n - k] % mod;
   }
   long long h(int n, int k) {return c(n + k - 1, k);}
