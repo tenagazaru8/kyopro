@@ -27,7 +27,43 @@ struct Comb
   }
 };
 
-
+struct Comb
+{
+  int siz, mod;
+  std::vector<long long> fac, inv, finv;
+  Comb(int m) : mod(m), siz(2)
+  {
+    fac.resize(2);
+    inv.resize(2);
+    finv.resize(2);
+    fac[0] = fac[1] = inv[1] = finv[0] = finv[1] = 1;
+  }
+  long long p(int n, int k)
+  {
+    if (n < k || k < 0) return 0;
+    resize(n + 2);
+    return fac[n] * finv[n - k] % mod;
+  }
+  long long c(int n, int k)
+  {
+    if (n < k || k < 0) return 0;
+    resize(n + 2);
+    return fac[n] * finv[k] % mod * finv[n - k] % mod;
+  }
+  long long h(int n, int k) {return c(n + k - 1, k);}
+private:
+  void resize(int n)
+  {
+    if (n <= siz) return;
+    for (int i = siz; i < n; ++i)
+    {
+      fac.push_back((long long)i * fac[i - 1] % mod);
+      inv.push_back(mod - inv[mod % i] * (mod / i) % mod);
+      finv.push_back(finv[i - 1] * inv[i] % mod);
+    }
+    siz = n;
+  }
+};
 
 struct Comb_mod
 {
