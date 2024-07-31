@@ -27,39 +27,58 @@ struct Comb
   }
 };
 
-struct Comb
+class Comb
 {
   int siz, mod;
-  std::vector<long long> fac, inv, finv;
+  std::vector<long long> _fac, _inv, _finv;
+public:
+  // 引数は (mod)
   Comb(int m) : mod(m), siz(2)
   {
-    fac.resize(2);
-    inv.resize(2);
-    finv.resize(2);
-    fac[0] = fac[1] = inv[1] = finv[0] = finv[1] = 1;
+    _fac.resize(siz);
+    _inv.resize(siz);
+    _finv.resize(siz);
+    _fac[0] = _fac[1] = _inv[1] = _finv[0] = _finv[1] = 1;
   }
   long long p(int n, int k)
   {
     if (n < k || k < 0) return 0;
     resize(n + 1);
-    return fac[n] * finv[n - k] % mod;
+    return _fac[n] * _finv[n - k] % mod;
   }
   long long c(int n, int k)
   {
     if (n < k || k < 0) return 0;
     resize(n + 1);
-    return fac[n] * finv[k] % mod * finv[n - k] % mod;
+    return _fac[n] * _finv[k] % mod * _finv[n - k] % mod;
   }
-  long long h(int n, int k) {return c(n + k - 1, k);}
+  long long inv(int n)
+  {
+    resize(n + 1);
+    if (n < 0) return 0;
+    else return _inv[n];
+  }
+  long long fac(int n)
+  {
+    resize(n + 1);
+    if (n < 0) return 0;
+    else return _fac[n];
+  }
+  long long finv(int n)
+  {
+    resize(n + 1);
+    if (n < 0) return 0;
+    else return _finv[n];
+  }
 private:
   void resize(int n)
   {
     if (n <= siz) return;
     for (int i = siz; i < n; ++i)
     {
-      fac.push_back((long long)i * fac[i - 1] % mod);
-      inv.push_back(mod - inv[mod % i] * (mod / i) % mod);
-      finv.push_back(finv[i - 1] * inv[i] % mod);
+      _fac.push_back((long long)i * _fac[i - 1] % mod);
+      _inv.push_back(mod - _inv[mod % i] * (mod / i) % mod);
+      _finv.push_back(_finv[i - 1] * _inv[i] % mod);
     }
     siz = n;
   }
