@@ -1,7 +1,8 @@
 #include <iostream>
-#include <stack>
 #include <queue>
 #include <vector>
+
+using namespace std;
 
 template<typename T>
 class maxflow
@@ -11,27 +12,25 @@ class maxflow
   std::vector<int> dis, id;
 public:
   maxflow(int n) : g(n), id(n), dis(n) {}
-  void add(int s, int t, T f)
+  void add_edge(int s, int t, T f)
   {
-    g[s].push_back({t, g[t].size(), f});
-    g[t].push_back({s, g[s].size() - 1, 0});
+    g[s].push_back({t, (int)g[t].size() + (s == t), f});
+    g[t].push_back({s, (int)g[s].size() - 1, 0});
   }
   T flow(int s, int t)
   {
     T ret = 0;
-    while (true)
+    while (bfs(s, t))
     {
-      bfs(s);
-      if (dis[t] <= dis[s]) return ret;
       id.assign(id.size(), 0);
-      T val;
-      while ((val = path(s, t)) > 0) ret += val;
+      ret += path(s, t, T((1LL << 60) | (1 << 30)));
     }
+    return ret;
   }
 private:
-  void bfs(int s)
+  bool bfs(int s, int t)
   {
-    dis.assign(g.size(), -1);
+    dis.assign(g.size(), g.size());
     dis[s] = 0;
     std::queue<int> q;
     for (q.push(s); !q.empty(); q.pop())
@@ -39,58 +38,30 @@ private:
       int now = q.front();
       for (auto &v : g[now])
       {
-        if (v.cap > 0 && dis[v.to] < 0)
+        if (v.cap > 0 && dis[v.to] > dis[now] + 1)
         {
           dis[v.to] = dis[now] + 1;
           q.push(v.to);
         }
       }
     }
+    return dis[t] < g.size();
   }
-  T path(int s, int t)
+  T path(int s, int t, T lim)
   {
-    const T inf = ((1LL << 60) | (1 << 30));
-    std::stack<edge> st;
-    T ret = inf;
-    st.push({s, -1, inf});
-    while (!st.empty())
+    if (s == t) return lim;
+    T now = 0;
+    for (int &i = id[t]; i < g[t].size(); ++i)
     {
-      auto now = st.top();
-      st.pop();
-      if (now.rep == -1)
-      {
-        if (now.to == t)
-        {
-          ret = now.cap;
-          break;
-        }
-        for (int &i = id[now.to]; i < g[now.to].size(); ++i)
-        {
-          auto &e = g[now.to][i];
-          if (dis[e.to] > dis[now.to] && e.cap > 0)
-          {
-            st.push({e.to, e.rep, 0});
-            st.push({e.to, -1, std::min(e.cap, now.cap)});
-          }
-        }
-      }
+      auto &e = g[t][i], &re = g[e.to][e.rep];
+      if (re.cap <= 0 || dis[e.to] >= dis[t] || dis[e.to] < 0) continue;
+      T tmp = path(s, e.to, std::min(lim - now, re.cap));
+      if (tmp == 0) continue;
+      e.cap += tmp;
+      re.cap -= tmp;
+      now += tmp;
+      if (now >= lim) break;
     }
-    if (ret == inf) return 0;
-    int now = t;
-    while (now != s)
-    {
-      while (!st.empty() && st.top().to != now) st.pop();
-      edge &v1 = st.top(), &v2 = g[v1.to][v1.rep];
-      v2.cap += ret;
-      g[v2.to][v2.rep].cap -= ret;
-      now = v2.to;
-    }
-    return ret;
+    return now;
   }
 };
-
-
-
-int main()
-{
-}
