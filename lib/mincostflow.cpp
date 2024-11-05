@@ -18,7 +18,7 @@ public:
     g[s].emplace_back(t, (int)g[t].size(), cap, cost);
     g[t].emplace_back(s, (int)g[s].size() - 1, 0, -cost);
   }
-  T min_cost_flow(int s, int t, T f)
+  T flow(int s, int t, T f)
   {
     T ret = 0;
     h.assign(g.size(), 0);
