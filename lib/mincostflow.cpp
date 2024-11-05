@@ -3,16 +3,14 @@
 #include <algorithm>
 #include <queue>
 
-using namespace std;
-
 template<typename T>
 class mincostflow
 {
-  struct edge {int to, rep; T cap, cost;};
+  struct edge {int to, rep; T cap, cost; edge(int t, int re, T ca, T co) : to(t), rep(re), cap(ca), cost(co) {}};
   std::vector<std::vector<edge>> g;
   std::vector<T> h, dis;
   std::vector<int> prevv, preve;
-  const T inf = (1LL << 60) | (1LL << 30);
+  const T inf = (T)((1LL << 60) | (1LL << 30));
 public:
   mincostflow(int n) : g(n), dis(n), prevv(n), preve(n) {}
   void add_edge(int s, int t, T cap, T cost)
@@ -27,7 +25,7 @@ public:
     while (f > 0)
     {
       dijkstra(s);
-      if (dis[t] == inf) return -1;
+      if (dis[t] == inf) return inf;
       for (int i = 0; i < g.size(); ++i) h[i] += dis[i];
       T d = f;
       for (int now = t; now != s; now = prevv[now]) d = std::min(d, g[prevv[now]][preve[now]].cap);
