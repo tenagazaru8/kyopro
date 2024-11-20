@@ -5,7 +5,7 @@
 template<typename T>
 class maxflow
 {
-  struct edge {int to, rep; T cap;};
+  struct edge {int to, rep; T cap; edge(int t, int r, T c) : to(t), rep(r), cap(c) {}};
   std::vector<std::vector<edge>> g;
   std::vector<int> dis, id;
 public:

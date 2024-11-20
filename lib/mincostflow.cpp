@@ -6,7 +6,7 @@
 template<typename T>
 class mincostflow
 {
-  struct edge {int to, rep; T cap, cost;};
+  struct edge {int to, rep; T cap, cost; edge(int t, int r, T ca, T co) : to(t), rep(r), cap(ca), cost(co){}};
   std::vector<std::vector<edge>> g;
   std::vector<T> h, dis;
   std::vector<int> prevv, preve;
@@ -18,7 +18,7 @@ public:
     g[s].emplace_back(t, (int)g[t].size(), cap, cost);
     g[t].emplace_back(s, (int)g[s].size() - 1, 0, -cost);
   }
-  T min_cost_flow(int s, int t, T f, bool isdag = false)
+  T flow(int s, int t, T f, bool isdag = false)
   {
     h.assign(g.size(), 0);
     if (isdag)
