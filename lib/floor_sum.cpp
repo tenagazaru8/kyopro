@@ -1,8 +1,7 @@
 /*
-floor_sum(n, m, a, b)
-->i=0,1,...,n-1  Σfloor((a*i+b)/m)
+以下の数式の結果をO(logN+logM)
+i=0,1,...,n-1  Σfloor((a*i+b)/m)
 */
-
 long long floor_sum(long long n, long long m, long long a, long long b)
 {
   long long ans = 0;

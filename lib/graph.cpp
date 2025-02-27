@@ -7,14 +7,16 @@ using namespace std;
 
 struct UF
 {
+  int gnum;
   vector<int> par, rank, size;
-  UF(int n) : par(n + 5), rank(n + 5), size(n + 5, 1) {for (int i = 0; i <= n; ++i) par[i] = i;}
+  UF(int n) : par(n + 5), rank(n + 5), size(n + 5, 1), gnum(n) {for (int i = 0; i <= n; ++i) par[i] = i;}
   int root(int x) {return par[x] == x ? x : (par[x] = root(par[x]));}
   void unite(int x, int y)
   {
     x = root(x);
     y = root(y);
     if (x == y) return;
+    --gnum;
     if (rank[x] < rank[y]) swap(x, y);
     par[y] = x;
     if (rank[x] == rank[y]) ++rank[x];
@@ -22,6 +24,7 @@ struct UF
   }
   int issame(int x, int y) {return root(x) == root(y);}
   int siz(int x) {return size[root(x)];}
+  int gsiz() {return gnum;}
 };
 
 template<typename T>
@@ -100,59 +103,4 @@ vector<int> ET(int s, vector<pair<int, int>> &e, bool directed = false)
   }
   reverse(ret.begin(), ret.end());
   return ret;
-}
-
-
-int main()
-{
-    int n, maxid = 1;
-
-    cin >> n;
-
-    vector<vector<int>> g(n + 1);
-    queue<int> q;
-    vector<int> flag(n + 1);
-
-    for (int i = 0; i < n - 1; ++i)
-    {
-        int a, b;
-
-        cin >> a >> b;
-
-        g[a].push_back(b);
-        g[b].push_back(a);
-    }
-
-    q.push(1);
-    flag[0] = 1;
-    
-    do
-    {
-        for (int i = 1; i <= n; ++i)
-            flag[i] = -1;
-        
-        flag[q.front()] = 1;
-
-        while (q.size())
-        {
-            int a = q.front();
-            q.pop();
-
-            for (int v : g[a])
-            {
-                if (flag[v] == -1)
-                {
-                    q.push(v);
-                    flag[v] = flag[a] + 1;
-                }
-            }
-        }
-
-        for (int i = 1; i <= n; ++i)
-            if (flag[maxid] < flag[i])
-                maxid = i;
-
-        q.push(maxid);
-    }
-    while (flag[0]--);
 }
