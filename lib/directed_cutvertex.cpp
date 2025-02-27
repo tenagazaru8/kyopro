@@ -305,3 +305,62 @@ namespace digraphPreprocess
         return ans;
     }
 };
+
+class digcut
+{
+    struct edge
+    {
+        int to, revid;
+        bool cap;
+        edge(int t, int r, bool c) : to(t), cap(c), revid(r) {}
+    };
+    vector<vector<edge>> g;
+public:
+    digcut(int n) : g(vector<vector<edge>> (2 * n))
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            g[2 * i].emplace_back(2 * i + 1, (int)g[2 * i + 1].size(), true);
+            g[2 * i + 1].emplace_back(2 * i, (int)g[2 * i].size(), false);
+        }
+    }
+
+    void add_edge(int u, int v)
+    {
+        g[2 * u + 1].emplace_back(2 * v, (int)g[2 * v].size(), true);
+        g[2 * v].emplace_back(2 * u + 1, (int)g[2 * u + 1].size(), false);
+    }
+
+    vector<int> getcutvertices(int s, int t)
+    {
+        vector<int> p, dis(2 * n, 1e9), ret;
+        queue<int> q;
+        dis[2 * t + 1] = 0;
+        for (q.emplace(2 * t + 1); !q.empty(); q.pop())
+        {
+            int now = q.front();
+            for (auto &e : g[now])
+            {
+                if (!e.c && dis[e.to] == 1e9)
+                {
+                    dis[e.to] = dis[now] + 1;
+                    q.emplace(e.to);
+                }
+            }
+        }
+        if (dis[2 * s] == 1e9) return ret;
+        vector<pair<int, int>> revid;
+        int now = 2 * s;
+        while (dis[now] > 0)
+        {
+            for (int i = 0; i < g[now].size(); ++i)
+            {
+                
+                g[now]
+                if ()
+            }
+        }
+        for ()
+        for ()
+    }
+}
