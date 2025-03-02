@@ -18,10 +18,8 @@ template <typename T> class monoidontree
     T (*const eval)(T &, T &) {};
 
 public:
-    monoidontree(int num, T E, T (*func)(T &, T &)) : e(E), eval(func), n(num), 
+    monoidontree(int num, T E, T (*func)(T &, T &)) : e(E), eval(func), n(num), g(num), dep(num, num + 1)
     {
-        g.resize(n);
-        dep.assign(n, n + 1);
         for (bit = 0; (1 << bit) < n; ++bit);
         ++bit;
         for (int i = 0; i < bit; ++i)
