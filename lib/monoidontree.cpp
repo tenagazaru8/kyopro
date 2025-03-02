@@ -113,7 +113,20 @@ public:
                 }
             }
         }
-        
+        for (int i = bit - 1; i >= 0; --i)
+        {
+            if (dub[i][s] == dub[i][t]) continue;
+            ansu = eval(ansu, dubu[i][s]);
+            ansd = eval(dubu[i][t], ansd);
+            s = dub[i][s];
+            t = dub[i][t];
+        }
+        if (s != t)
+        {
+            ansu = eval(ansu, dubu[0][s]);
+            ansd = eval(dubd[0][t], ansd);
+        }
+        return eval(ansu, ansd);
     }
 };
 
