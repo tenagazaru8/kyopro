@@ -1,24 +1,19 @@
-//製作途中
-
 #include <iostream>
 #include <vector>
-#include <queue>
 #include <algorithm>
-
-using namespace std;
 
 template <typename T> class monoidontree
 {
     int n, bit;
-    vector<vector<pair<int, T>>> g;
-    vector<T> dubu[20], dubd[20];
-    vector<int> dub[20], dep;
+    std::vector<std::vector<std::pair<int, T>>> g;
+    std::vector<T> dubu[20], dubd[20];
+    std::vector<int> dub[20], dep;
     bool isbuild;
     T e;
     T (*const eval)(T &, T &) {};
 
 public:
-    monoidontree(int num, T E, T (*func)(T &, T &)) : e(E), eval(func), n(num), g(num), dep(num, num + 1)
+    monoidontree(int num, T E, T (*func)(T &, T &)) : e(E), eval(func), n(num), g(num), dep(num, num + 1), isbuild(false)
     {
         for (bit = 0; (1 << bit) < n; ++bit);
         ++bit;
@@ -36,8 +31,7 @@ public:
     {
         if (isbuild) return;
         isbuild = true;
-        vector<int> st;
-        dub[0] = -1;
+        std::vector<int> st;
         dep[0] = 0;
         for (st.push_back(0); !st.empty();)
         {
@@ -82,10 +76,14 @@ public:
 
     T getval(int s, int t)
     {
-        if (!isbuild) exit(2);
+        if (!isbuild)
+        {
+            isbuild = true;
+            build();
+        }
         int ds = dep[s], dt = dep[t];
         T ansu = e, ansd = e;
-        if (ds < dt)
+        if (ds > dt)
         {
             int d = ds - dt;
             for (int i = 0; i < bit && d > 0; ++i)
@@ -98,7 +96,7 @@ public:
                 }
             }
         }
-        else if (ds > dt)
+        else if (ds < dt)
         {
             int d = dt - ds;
             for (int i = 0; i < bit && d > 0; ++i)
@@ -127,8 +125,3 @@ public:
         return eval(ansu, ansd);
     }
 };
-
-int main()
-{
-
-}
