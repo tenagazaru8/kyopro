@@ -40,6 +40,36 @@ pair<long long, long long> crt(long long b1, long long m1, long long b2, long lo
   return {((b1 + m1 * ((b2 - b1) / g * x % (m2 / g))) % lc + lc) % lc, lc};
 }
 
+bool isprime(long long n)
+{
+    if (n == 2) return true;
+    else if (n == 1 || n % 2 == 0) return false;
+    auto pow = [&](__int128_t a, long long k) -> long long
+    {
+        __int128_t ret = 1;
+        for (a %= n; k > 0; k >>= 1, a = a * a % n) if (k & 1) ret = ret * a % n;
+        return ret;
+    };
+    long long m = n - 1;
+    int s = 0;
+    while (!((m >> s) & 1)) ++s;
+    long long d = (m >> s);
+    for (long long p : {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37})
+    {
+        if (p == n) return true;
+        long long x = pow(p, d);
+        int r = 0;
+        if (x == 1) continue;
+        while (x != m)
+        {
+            x = pow(x, 2);
+            ++r;
+            if (x == 1 || r == s) return false;
+        }
+    }
+    return true;
+}
+
 long long lagrange(int siz, int mod)
 {
   vector<long long> y(siz, 1);
