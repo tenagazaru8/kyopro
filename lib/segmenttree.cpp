@@ -54,7 +54,7 @@ public:
   {
     T now = e;
     int id = left + num - 1;
-    while (id < 2 * num - 1)
+    while (true)
     {
       T tmp = eval(now, dat[id]);
       if (check(v, tmp))
@@ -63,7 +63,7 @@ public:
         else
         {
           int tmpid = id + 2;
-          if ((tmpid & -id) == tmpid) return num;
+          if ((tmpid & -tmpid) == tmpid) return num;
           id >>= 1;
         }
         now = tmp;
@@ -75,5 +75,32 @@ public:
       }
     }
     return id - num + 1;
+  }
+  int minleft(int right, T v, bool (*const check)(T &, T &))
+  {
+    if (right == 0) return 0;
+    T now = e;
+    int id = right + num - 2;
+    while (true)
+    {
+      T tmp = eval(dat[id], now);
+      if (check(v, tmp))
+      {
+        if (id & 1)
+        {
+          int tmpid = id + 1;
+          if ((tmpid & -tmpid) == tmpid) return 0;
+          id = (id >> 1);
+        }
+        --id;
+        now = tmp;
+      }
+      else
+      {
+        if (num - 1 <= id && id < num * 2 - 1) break;
+        id = (id << 1) + 2;
+      }
+    }
+    return id - num + 2;
   }
 };
