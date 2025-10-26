@@ -50,4 +50,30 @@ public:
     return eval(ansl, ansr);
   }
   T getval(int id) {return dat[num - 1 + id];}
+  int maxright(int left, T v, bool (*const check)(T &, T &))
+  {
+    T now = e;
+    int id = left + num - 1;
+    while (id < 2 * num - 1)
+    {
+      T tmp = eval(now, dat[id]);
+      if (check(v, tmp))
+      {
+        if (id & 1) ++id;
+        else
+        {
+          int tmpid = id + 2;
+          if ((tmpid & -id) == tmpid) return num;
+          id >>= 1;
+        }
+        now = tmp;
+      }
+      else
+      {
+        if (num - 1 <= id && id < num * 2 - 1) break;
+        id = (id << 1) + 1;
+      }
+    }
+    return id - num + 1;
+  }
 };
