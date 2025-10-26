@@ -31,7 +31,7 @@ public:
   }
 
   //update [left,right)
-  void rangeupdate(int left, int right, X val)
+  void update(int left, int right, X val)
   {
     std::stack<std::pair<int, int>> st;
     std::stack<int> s;
@@ -98,3 +98,12 @@ private:
     lazy[index] = ex;
   }
 };
+
+/*
+区間代入区間和
+auto eval = [](long long a, long long b) -> long long {return a + b;};
+auto fa = [](long long a, long long b) -> long long {return b;};
+auto fp = [](long long a, int len) -> long long {return a * len;};
+LazySegTree<long long, long long> lsg(v, 0, 使わない値, eval, fa, fa, fp);
+
+*/ 
