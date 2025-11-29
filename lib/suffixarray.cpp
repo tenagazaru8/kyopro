@@ -4,10 +4,11 @@
 #include <vector>
 #include <algorithm>
 
+template<typename S>
 struct SuffixArray {
     // 接尾辞配列の構築
     // O(|S|log|S|)
-    SuffixArray(const string& str) : s(str) {
+    SuffixArray(const S& str) : s(str) {
         int n = s.size();
         sa.resize(n);
         for (int i = 0; i < n; ++i) sa[i] = i;
@@ -72,19 +73,16 @@ struct SuffixArray {
         return {idx, high};
     }
     std::vector<int> sa;
-    string s;
+    S s;
 };
-ostream& operator<<(ostream& os, const SuffixArray& sa) {
-    for (int i = 0; i < sa.s.size(); ++i) {
-        os << sa[i] << ": " << sa.s.substr(sa[i]) << '\n';
-    }
-    return os;
-}
+template <class S>
+SuffixArray(S) -> SuffixArray<S>;
+template<typename S>
 struct LCPArray {
     // LCP Arrayの構築
     // O(|S|)
-    LCPArray(SuffixArray& sa) {
-        const string& s = sa.s;
+    LCPArray(SuffixArray<S>& sa) {
+        const S &s = sa.s;
         int n = s.size();
         rank.resize(n);
         for (int i = 0; i < n; ++i) {
@@ -95,7 +93,7 @@ struct LCPArray {
         for (int i = 0, h = 0; i < n; ++i) {
             if (rank[i] + 1 < n) {
                 for (int j = sa[rank[i]+1]; max(i,j)+h < n && s[i+h]==s[j+h]; ++h) {}
-                lcp[rank[i]+1] = h;
+                lcp[rank[i]] = h;
                 if (h > 0) --h;
             }
         }
@@ -107,3 +105,5 @@ struct LCPArray {
     }
     std::vector<int> lcp,rank;
 };
+template <class S>
+LCPArray(SuffixArray<S>) -> LCPArray<S>;
