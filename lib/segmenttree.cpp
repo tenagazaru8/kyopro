@@ -1,15 +1,15 @@
 #include <iostream>
 #include <vector>
 
-template <typename T> class SegTree
+template <typename T, typename F> class SegTree
 {
 private:
   const T e;
   int num;
   std::vector<T> dat;
-  T (*const eval)(T &, T &) {};
+  F eval;
 public:
-  SegTree(std::vector<T> &v, T E, T (*func)(T &, T &)) : e(E), eval(func)
+  SegTree(std::vector<T> &v, T E, F func) : e(E), eval(func)
   {
     int siz = static_cast<int>(v.size());
     for (num = 1; num < siz; num <<= 1);
@@ -17,7 +17,7 @@ public:
     for (int i = 0; i < siz; ++i) dat[i + num - 1] = v[i];
     for (int i = num - 2; i >= 0; --i) dat[i] = eval(dat[i * 2 + 1], dat[i * 2 + 2]);
   }
-  SegTree(int n, T E, T (*func)(T &, T &)) : e(E), eval(func)
+  SegTree(int n, T E, F func) : e(E), eval(func)
   {
     for (num = 1; num < n; num <<= 1);
     dat = std::vector<T> (2 * num - 1, e);
@@ -50,14 +50,15 @@ public:
     return eval(ansl, ansr);
   }
   T getval(int id) {return dat[num - 1 + id];}
-  int maxright(int left, T v, bool (*const check)(T &, T &))
+  template<typename Fc>
+  int maxright(int left, Fc check)
   {
     T now = e;
     int id = left + num - 1;
     while (true)
     {
       T tmp = eval(now, dat[id]);
-      if (check(v, tmp))
+      if (check(tmp))
       {
         if (id & 1) ++id;
         else
@@ -76,7 +77,8 @@ public:
     }
     return id - num + 1;
   }
-  int minleft(int right, T v, bool (*const check)(T &, T &))
+  template<typename Fc>
+  int minleft(int right, Fc check)
   {
     if (right == 0) return 0;
     T now = e;
@@ -84,7 +86,7 @@ public:
     while (true)
     {
       T tmp = eval(dat[id], now);
-      if (check(v, tmp))
+      if (check(tmp))
       {
         if (id & 1)
         {
@@ -104,3 +106,7 @@ public:
     return id - num + 2;
   }
 };
+template <class T, class F>
+SegTree(std::vector<T> &, T, F) -> SegTree<T, F>;
+template <class T, class F>
+SegTree(int, T, F) -> SegTree<T, F>;
