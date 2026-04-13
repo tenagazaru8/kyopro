@@ -88,7 +88,7 @@ public:
       T tmp = eval(dat[id], now);
       if (check(tmp))
       {
-        if (id & 1)
+        if ((id & 1) || id == 0)
         {
           int tmpid = id + 1;
           if ((tmpid & -tmpid) == tmpid) return 0;
