@@ -3,22 +3,22 @@
 #include <algorithm>
 #include <queue>
 
-template<typename T>
+template<typename F, typename T>
 class mincostflow
 {
-  struct edge {int to, rep; T cap, cost; edge(int t, int r, T ca, T co) : to(t), rep(r), cap(ca), cost(co){}};
-  std::vector<std::vector<edge>> g;
+  struct edge {int to, rep; F cap; T cost; edge(int t, int r, F ca, T co) : to(t), rep(r), cap(ca), cost(co){}};
   std::vector<T> h, dis;
   std::vector<int> prevv, preve;
-  const T inf = (1LL << 60) | (1LL << 30);
+  const T inf = (1LL << 60) + (1 << 30);
 public:
+  std::vector<std::vector<edge>> g;
   mincostflow(int n) : g(n), dis(n), prevv(n), preve(n) {}
   void add_edge(int s, int t, T cap, T cost)
   {
     g[s].emplace_back(t, (int)g[t].size(), cap, cost);
     g[t].emplace_back(s, (int)g[s].size() - 1, 0, -cost);
   }
-  T flow(int s, int t, T f, bool isdag = false)
+  T flow(int s, int t, F f, bool isdag = false)
   {
     h.assign(g.size(), 0);
     if (isdag)
@@ -53,7 +53,7 @@ public:
     {
       if (dis[t] == inf) return inf;
       for (int i = 0; i < g.size(); ++i) h[i] += dis[i];
-      T d = f;
+      F d = f;
       for (int now = t; now != s; now = prevv[now]) d = std::min(d, g[prevv[now]][preve[now]].cap);
       f -= d;
       ret += d * h[t];
