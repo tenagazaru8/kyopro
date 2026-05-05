@@ -22,9 +22,16 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
     for (int i = 1; i < bc; ++i) gp2[i] = gp2[i - 1] * gp2[i - 1] % mod;
     invgp2[0] = 469870224;
     for (int i = 1; i < bc; ++i) invgp2[i] = invgp2[i - 1] * invgp2[i - 1] % mod;
-    auto bsw = [](unsigned int x, unsigned int m, unsigned char s) -> unsigned int {return ((x >> s) & m) | ((x & m) << s);};
-    for (int i = 0; i < 1 << bc; ++i) br[i] = bsw(bsw(bsw(bsw(bsw(i, 0x0000ffff, 16), 0x00ff00ff, 8), 0x0f0f0f0f, 4), 0x33333333, 2), 0x55555555, 1) >> 9;
-    init = false;
+    for (int i = 0; i < 1 << bc; ++i)
+    {
+      unsigned int ni = i;
+      ni = ((ni >> 16) & 0x0000ffff) | ((ni & 0x0000ffff) << 16);
+      ni = ((ni >> 8) & 0x00ff00ff) | ((ni & 0x00ff00ff) << 8);
+      ni = ((ni >> 4) & 0x0f0f0f0f) | ((ni & 0x0f0f0f0f) << 4);
+      ni = ((ni >> 2) & 0x33333333) | ((ni & 0x33333333) << 2);
+      ni = ((ni >> 1) & 0x55555555) | ((ni & 0x55555555) << 1);
+      br[i] = ni >> 9;
+    }
   }
   for (int tb = nb - 1; tb >= 0; --tb)
   {
