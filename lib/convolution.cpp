@@ -12,7 +12,7 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
   a.resize(n);
   b.resize(n);
   static long long invgp2[23], gp2[23], invp2[23];
-  static unsigned char lookup[1 << 23];
+  static unsigned int br[1 << 23];
   static bool init = true;
   if (init)
   {
@@ -22,8 +22,8 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
     for (int i = 1; i < bc; ++i) gp2[i] = gp2[i - 1] * gp2[i - 1] % mod;
     invgp2[0] = 469870224;
     for (int i = 1; i < bc; ++i) invgp2[i] = invgp2[i - 1] * invgp2[i - 1] % mod;
-    lookup[0] = -1, lookup[1] = 0;
-    for (int i = 2; i < (1 << bc); ++i) lookup[i] = lookup[i >> 1] + 1;
+    auto bsw = [](unsigned int x, unsigned int m, unsigned char s) -> unsigned int {return ((x >> s) & m) | ((x & m) << s);};
+    for (int i = 0; i < 1 << bc; ++i) br[i] = bsw(bsw(bsw(bsw(bsw(i, 0x0000ffff, 16), 0x00ff00ff, 8), 0x0f0f0f0f, 4), 0x33333333, 2), 0x55555555, 1) >> 9;
     init = false;
   }
   for (int tb = nb - 1; tb >= 0; --tb)
@@ -49,18 +49,8 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
       }
     }
   }
-  std::vector<int> br(n);
-  for (int i = 0; i < n; ++i)
-  {
-    for (int tmp = i; tmp > 0;)
-    {
-      int lb = tmp & -tmp;
-      br[i] += (1 << nb - lookup[lb] - 1);
-      tmp -= lb;
-    }
-  }
   std::vector<long long> c(n);
-  for(int i = 0; i < n; ++i) c[br[i]] = (long long)a[i] * b[i] % mod;
+  for(int i = 0; i < n; ++i) c[br[i] >> bc - nb] = (long long)a[i] * b[i] % mod;
   for (int tb = nb - 1; tb >= 0; --tb)
   {
     int bt = (1 << tb);
@@ -80,6 +70,6 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
     }
   }
   std::vector<T> res(siz);
-  for (int i = 0; i < n; ++i) if (br[i] < siz) res[br[i]] = c[i] * invp2[nb] % mod;
+  for (int i = 0; i < n; ++i) if ((br[i] >> bc - nb) < siz) res[br[i] >> bc - nb] = c[i] * invp2[nb] % mod;
   return res;
 }
