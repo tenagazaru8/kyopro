@@ -1,109 +1,97 @@
-
-template <typename T, typename X> class LazySegTree
+template <typename T, typename X, typename Fe, typename Fa, typename Fm> class LazySegTree
 {
 private:
   const T et;
   const X ex;
-  int num;
+  int num, nb;
   std::vector<T> dat;
   std::vector<X> lazy;
-  T (*const eval)(const T, const T) {};
-  T (*const fa)(const T, const X) {};
-  X (*const fm)(const X, const X) {};
-  X (*const fp)(const X, int) {};
+  Fe eval;
+  Fa fa;
+  Fm fm;
     
 public:
-  LazySegTree(std::vector<T> &v, T Et, X Ex, T (*valcal)(T, T), T (*lazyupdate)(T, X), X (*lazypropagation)(X, X), X (*rangelazy)(X, int)) : et(Et), ex(Ex), eval(valcal), fa(lazyupdate), fm(lazypropagation), fp(rangelazy)
+  LazySegTree(std::vector<T> &v, T Et, X Ex, Fe valcal, Fa lazyupdate, Fm lazypropagation) : et(Et), ex(Ex), eval(valcal), fa(lazyupdate), fm(lazypropagation)
   {
     int siz = static_cast<int>(v.size());
-    for (num = 1; num < siz; num <<= 1);
-    dat = std::vector<T> (2 * num - 1, et);
-    lazy = std::vector<X> (2 * num - 1, ex);
-    for (int i = 0; i < siz; ++i) dat[i + num - 1] = v[i];
-    for (int i = num - 2; i >= 0; --i) dat[i] = eval(dat[i * 2 + 1], dat[i * 2 + 2]);
+    for (nb = 0; 1 << nb < siz; ++nb);
+    num = 1 << nb;
+    dat = std::vector<T> (num << 1, et);
+    lazy = std::vector<X> (num, ex);
+    for (int i = 0; i < siz; ++i) dat[i + num] = v[i];
+    for (int i = num - 1; i > 0; --i) dat[i] = eval(dat[i << 1], dat[(i << 1) + 1]);
   }
-
-  LazySegTree(int n, T Et, X Ex, T (*valcal)(T, T), T (*lazyupdate)(T, X), X (*lazypropagation)(X, X), X (*rangelazy)(X, int)) : et(Et), ex(Ex), eval(valcal), fa(lazyupdate), fm(lazypropagation), fp(rangelazy)
+  
+  LazySegTree(int n, T Et, X Ex, Fe valcal, Fa lazyupdate, Fm lazypropagation) : et(Et), ex(Ex), eval(valcal), fa(lazyupdate), fm(lazypropagation)
   {
-    for (num = 1; num < n; num <<= 1);
-    dat = std::vector<T> (2 * num - 1, et);
-    lazy = std::vector<X> (2 * num - 1, ex);
+    for (nb = 0; 1 << nb < n; ++nb);
+    num = 1 << nb;
+    dat = std::vector<T> (num << 1, et);
+    lazy = std::vector<X> (num, ex);
   }
 
   //update [left,right)
   void update(int left, int right, X val)
   {
-    std::stack<std::pair<int, int>> st;
-    std::stack<int> s;
-    for (st.push({0, num}); !st.empty();)
+    left = std::max(0, left), right = std::min(num, right);
+    if (left >= right) return;
+    left += num;
+    right += num;
+    for (int i = nb; i > 0; --i)
     {
-      auto v = st.top();
-      st.pop();
-      int now = (num + v.first) / (v.second - v.first) - 1;
-      lazyupdate(now, v.second - v.first);
-      if (left <= v.first && v.second <= right)
-      {
-        lazy[now] = fm(lazy[now], val);
-        lazyupdate(now, v.second - v.first);
-      }
-      else if (!(v.second <= left || right <= v.first))
-      {
-        st.push({(v.first + v.second) / 2, v.second});
-        st.push({v.first, (v.first + v.second) / 2});
-        s.push(now);
-      }
+      if (((left >> i) << i) != left) lazyupdate(left >> i);
+      if (((right >> i) << i) != right) lazyupdate((right - 1) >> i);
     }
-    while (!s.empty())
+    for (int l = left, r = right; l < r; l >>= 1, r >>= 1)
     {
-      int index = s.top();
-      dat[index] = eval(dat[2 * index + 1], dat[2 * index + 2]);
-      s.pop();
+      if (l & 1) nodeapply(l++, val);
+      if (r & 1) nodeapply(--r, val);
+    }
+    for (int i = 1; i <= nb; ++i)
+    {
+      if (((left >> i) << i) != left) dat[(left >> i)] = eval(dat[(left >> i) << 1], dat[((left >> i) << 1) + 1]);
+      if (((right >> i) << i) != right) dat[(right - 1 >> i)] = eval(dat[(right - 1 >> i) << 1], dat[((right - 1 >> i) << 1) + 1]);
     }
   }
 
   //get value [left,right)
   T getval(int left, int right)
   {
-    std::stack<std::pair<int, int>> s;
-    T ans = et;
-    for (s.push({0, num}); !s.empty();)
+    left = std::max(0, left), right = std::min(num, right);
+    if (left >= right) return et;
+    left += num;
+    right += num;
+    for (int i = nb; i > 0; --i)
     {
-      auto v = s.top();
-      s.pop();
-      int now = (num + v.first) / (v.second - v.first) - 1;
-      lazyupdate(now, v.second - v.first);
-      if (left <= v.first && v.second <= right) ans = eval(ans, dat[now]);
-      else if (!(v.second <= left || right <= v.first))
-      {
-        s.push({(v.first + v.second) / 2, v.second});
-        s.push({v.first, (v.first + v.second) / 2});
-      }
+      if (((left >> i) << i) != left) lazyupdate(left >> i);
+      if (((right >> i) << i) != right) lazyupdate(right - 1 >> i);
     }
-    return ans;
+    T ansl = et, ansr = et;
+    for (int l = left, r = right; l < r; l >>= 1, r >>= 1)
+    {
+      if (l & 1) ansl = eval(ansl, dat[l++]);
+      if (r & 1) ansr = eval(dat[--r], ansr);
+    }
+    return eval(ansl, ansr);
   }
 
   //get value [id]
   T getval(int id) {return getval(id, id + 1);}
 
 private:
-  void lazyupdate(int index, int len)
+  void nodeapply(int id, X val)
   {
-    if (lazy[index] == ex) return;
-    if (index < num - 1)
-    {
-      lazy[index * 2 + 1] = fm(lazy[index * 2 + 1], lazy[index]);
-      lazy[index * 2 + 2] = fm(lazy[index * 2 + 2], lazy[index]);
-    }
-    dat[index] = fa(dat[index], fp(lazy[index], len));
-    lazy[index] = ex;
+    dat[id] = fa(dat[id], val);
+    if (id < num) lazy[id] = fm(lazy[id], val);
+  }
+  void lazyupdate(int id)
+  {
+    nodeapply(id << 1, lazy[id]);
+    nodeapply((id << 1) + 1, lazy[id]);
+    lazy[id] = ex;
   }
 };
-
-/*
-区間代入区間和
-auto eval = [](long long a, long long b) -> long long {return a + b;};
-auto fa = [](long long a, long long b) -> long long {return b;};
-auto fp = [](long long a, int len) -> long long {return a * len;};
-LazySegTree<long long, long long> lsg(v, 0, 使わない値, eval, fa, fa, fp);
-
-*/ 
+template <class T, class X, class Fe, class Fa, class Fm>
+LazySegTree(std::vector<T> &, T, X, Fe, Fa, Fm) -> LazySegTree<T, X, Fe, Fa, Fm>;
+template <class T, class X, class Fe, class Fa, class Fm>
+LazySegTree(int, T, X, Fe, Fa, Fm) -> LazySegTree<T, X, Fe, Fa, Fm>;
