@@ -53,6 +53,12 @@ public:
       if (((right >> i) << i) != right) dat[(right - 1 >> i)] = eval(dat[(right - 1 >> i) << 1], dat[((right - 1 >> i) << 1) + 1]);
     }
   }
+  void update(int id, X val)
+  {
+    id = std::max(0, id);
+    id = std::min(num, id);
+    update(id, id + 1, val);
+  }
 
   //get value [left,right)
   T getval(int left, int right)
