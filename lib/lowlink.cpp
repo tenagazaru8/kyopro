@@ -19,7 +19,7 @@ struct lowlink
     for (auto &v : e)
     {
       int a = v.first, b = v.second;
-      edge e1{b, g[b].size(), 0}, e2{a, g[a].size(), 0};
+      edge e1{b, (int)g[b].size(), 0}, e2{a, (int)g[a].size(), 0};
       g[a].push_back(e1);
       g[b].push_back(e2);
     }
