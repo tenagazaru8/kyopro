@@ -16,6 +16,7 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
   static bool init = true;
   if (init)
   {
+    init = false;
     invp2[0] = 1;
     for (int i = 1; i < bc; ++i) invp2[i] = invp2[i - 1] * 499122177 % mod;
     gp2[0] = 15311432;
