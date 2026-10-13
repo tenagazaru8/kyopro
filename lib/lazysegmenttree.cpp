@@ -84,6 +84,74 @@ public:
   //get value [id]
   T getval(int id) {return getval(id, id + 1);}
 
+  template <typename Fc>
+  int maxright(int left, Fc check)
+  {
+    left = std::max(0, left);
+    left = std::min(num, left);
+    if (left == num) return num;
+    int l = left + num;
+    for (int i = nb; i > 0; --i) lazyupdate(l >> i);
+    T now = et;
+    while (true)
+    {
+      while ((l & 1) == 0) l >>= 1;
+      T tmp = eval(now, dat[l]);
+      if (!check(tmp))
+      {
+        while (l < num)
+        {
+          lazyupdate(l);
+          l <<= 1;
+          tmp = eval(now, dat[l]);
+          if (check(tmp))
+          {
+            now = tmp;
+            ++l;
+          }
+        }
+        return l - num;
+      }
+      now = tmp;
+      ++l;
+      if ((l & -l) == l) return num;
+    }
+  }
+
+  template <typename Fc>
+  int minleft(int right, Fc check)
+  {
+    right = std::max(0, right);
+    right = std::min(num, right);
+    if (right == 0) return 0;
+    int r = right + num;
+    for (int i = nb; i > 0; --i) lazyupdate((r - 1) >> i);
+    T now = et;
+    while (true)
+    {
+      --r;
+      while (r > 1 && (r & 1)) r >>= 1;
+      T tmp = eval(dat[r], now);
+      if (!check(tmp))
+      {
+        while (r < num)
+        {
+          lazyupdate(r);
+          r = (r << 1) + 1;
+          tmp = eval(dat[r], now);
+          if (check(tmp))
+          {
+            now = tmp;
+            --r;
+          }
+        }
+        return r + 1 - num;
+      }
+      now = tmp;
+      if ((r & -r) == r) return 0;
+    }
+  }
+
 private:
   void nodeapply(int id, X val)
   {
