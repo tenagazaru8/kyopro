@@ -2,7 +2,7 @@
 #include <vector>
 #include <algorithm>
 
-template <typename T> class monoidontree
+template <typename T, typename F> class monoidontree
 {
     int n, bit;
     std::vector<std::vector<std::pair<int, T>>> g;
@@ -10,10 +10,10 @@ template <typename T> class monoidontree
     std::vector<int> dub[20], dep;
     bool isbuild;
     T e;
-    T (*const eval)(T &, T &) {};
+    F eval;
 
 public:
-    monoidontree(int num, T E, T (*func)(T &, T &)) : e(E), eval(func), n(num), g(num), dep(num, num + 1), isbuild(false)
+    monoidontree(int num, T E, F func) : e(E), eval(func), n(num), g(num), dep(num, num + 1), isbuild(false)
     {
         for (bit = 0; (1 << bit) < n; ++bit);
         ++bit;
@@ -24,9 +24,7 @@ public:
             dubd[i].assign(n, e);
         }
     }
-
     void add_edge(int u, int v, T val) {g[u].emplace_back(v, val);}
-
     void build()
     {
         if (isbuild) return;
@@ -73,7 +71,6 @@ public:
             }
         }
     }
-
     T getval(int s, int t)
     {
         if (!isbuild)
@@ -125,3 +122,5 @@ public:
         return eval(ansu, ansd);
     }
 };
+template <class T, class F>
+monoidontree(int, T, F) -> monoidontree<T, F>;
