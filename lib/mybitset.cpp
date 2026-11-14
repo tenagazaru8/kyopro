@@ -8,13 +8,13 @@ class bitset
   const uint64_t all = -1;
   uint32_t num;
   int siz, modu;
-  uint64_t *dat;
+  vector<uint64_t> dat;
 public:
   bitset(int n = 0, bool s = 0) : num(n)
   {
     siz = (num + 63) >> 6;
     modu = num & 63;
-    dat = new uint64_t [siz];
+    dat.resize(siz);
     if (s)
     {
       for (int i = 0; i < siz - 1; ++i) dat[i] = all;
@@ -27,10 +27,10 @@ public:
     siz = bs.siz;
     num = bs.num;
     modu = bs.modu;
-    dat = new uint64_t [siz];
+    dat.resize(siz);
     for (int i = 0; i < siz; ++i) dat[i] = bs.dat[i];
   }
-  ~bitset() {delete [] dat;}
+  ~bitset() {}
   
   // 0-index, bs[id]=flag
   void set(uint32_t id, uint64_t flag)
@@ -95,13 +95,12 @@ public:
   
   void resize(int n, bool s = 0)
   {
+    int bn = num;
     num = n;
     siz = (num + 63) >> 6;
     modu = num & 63;
-    delete [] dat;
-    dat = new uint64_t [siz];
-    for (int i = 0; i < siz; ++i) dat[i] = 0;
-    if (s) flip();
+    dat.resize(siz);
+    if (bn < n) set(bn, n, s);
   }
   
   bool isall()
@@ -129,43 +128,51 @@ public:
     num = a.num;
     modu = a.modu;
     siz = a.siz;
-    delete[] dat;
-    dat = new uint64_t [siz];
-    for (int i = 0; i < siz; ++i) dat[i] = a.dat[i];
+    dat = a.dat;
     return *this;
   }
   inline bitset& operator&=(const bitset &a)
   {
-    if (a.num != num) exit(2);
-    for (int i = 0; i < siz; ++i) dat[i] &= a.dat[i];
+    int msiz = siz;
+    if (msiz > a.siz) msiz = a.siz;
+    for (int i = 0; i < msiz; ++i) dat[i] &= a.dat[i];
     return *this;
   }
   inline bitset& operator|=(const bitset &a)
   {
-    if (a.num != num) exit(2);
-    for (int i = 0; i < siz; ++i) dat[i] |= a.dat[i];
+    int msiz = siz;
+    if (msiz > a.siz) msiz = a.siz;
+    for (int i = 0; i < msiz; ++i) dat[i] |= a.dat[i];
     return *this;
   }
   inline bitset& operator^=(const bitset &a)
   {
-    if (a.num != num) exit(2);
-    for (int i = 0; i < siz; ++i) dat[i] ^= a.dat[i];
+    int msiz = siz;
+    if (msiz > a.siz) msiz = a.siz;
+    for (int i = 0; i < msiz; ++i) dat[i] ^= a.dat[i];
     return *this;
   }
   inline bitset operator&(const bitset &a) {return bitset(*this) &= a;}
   inline bitset operator|(const bitset &a) {return bitset(*this) |= a;}
   inline bitset operator^(const bitset &a) {return bitset(*this) ^= a;}
-  
-  // inline bitset operator<<(const int s)
-  // {
-    
-  // }
+  inline bitset operator<<(const int s)
+  {
+    int did = s >> 6;
+    int nbit = 64 - (s & 63);
+    for (int i = siz - 1; i > siz - did; --i) dat[i] = 0;
+    for (int i = siz - did; i >= 0; --i)
+    {
+      if (i + 1 + did < siz) dat[i + 1 + did] |= (dat[i] >> nbit);
+      uint64_t tmp = (dat[i] << (s & 63)) & all;
+      dat[i + did] = tmp
+    }
+  }
 
-  // inline bitset operator<<=(const bitset &a, const bitset &b)
-  // {
-  //   // bitset bs
-  //   // int siz = max(a.size(), b.size());
-  // }
+  inline bitset operator<<=(const bitset &a, const int b)
+  {
+    // bitset bs
+    // int siz = max(a.size(), b.size());
+  }
   // inline bitset& operator>>=(const int a)
   // {
   //   // if (a.num != num) exit(2);
