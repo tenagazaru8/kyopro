@@ -104,3 +104,51 @@ std::vector<T> inversion(const std::vector<T> &v)
   }
   return ret;
 }
+
+template<typename T>
+std::vector<T> div(const std::vector<T> &a, const std::vector<T> &b)
+{
+  const int mod = 998244353;
+  std::vector<T> aa = a, bb = b;
+  while (!aa.empty() && aa.back() == 0) aa.pop_back();
+  while (!bb.empty() && bb.back() == 0) bb.pop_back();
+  if (aa.empty() || aa.size() < bb.size()) return {0};
+  if (bb.empty())
+  {
+    cout << "多項式の除算で0除算" << endl;
+    exit(1);
+  }
+  int k = aa.size() - bb.size() + 1;
+  std::reverse(aa.begin(), aa.end());
+  std::reverse(bb.begin(), bb.end());
+  aa.resize(k);
+  bb.resize(k, 0);
+  auto ib = inversion(bb);
+  auto q = convolution(aa, ib);
+  q.resize(k);
+  std::reverse(q.begin(), q.end());
+  while (!q.empty() && q.back() == 0) q.pop_back();
+  return q;
+}
+
+template<typename T>
+std::vector<T> poly_mod(const std::vector<T> &a, const std::vector<T> &b)
+{
+  const int mod = 998244353;
+  std::vector<T> aa = a, bb = b;
+  while (!aa.empty() && aa.back() == 0) aa.pop_back();
+  while (!bb.empty() && bb.back() == 0) bb.pop_back();
+  if (aa.empty()) return {0};
+  if (aa.size() < bb.size()) return aa;
+  if (bb.empty())
+  {
+    cout << "多項式の除算で0除算" << endl;
+    exit(1);
+  }
+  auto q = div(aa, bb);
+  auto qb = convolution(q, bb);
+  aa.resize(std::max(aa.size(), qb.size()), 0);
+  for (int i = 0; i < qb.size(); ++i) aa[i] = (aa[i] - qb[i] + mod) % mod;
+  while (aa.size() > 1 && aa.back() == 0) aa.pop_back();
+  return aa;
+}
