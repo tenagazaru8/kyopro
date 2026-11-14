@@ -81,3 +81,26 @@ std::vector<T> convolution(std::vector<T> a, std::vector<T> b)
   for (int i = 0; i < n; ++i) if ((br[i] >> bc - nb) < siz) res[br[i] >> bc - nb] = c[i] * invp2[nb] % mod;
   return res;
 }
+
+template<typename T>
+std::vector<T> inversion(const std::vector<T> &v)
+{
+  const int mod = 998244353;
+  int n = v.size();
+  std::vector<T> ret(1), f;
+  ret[0] = 1;
+  f.reserve(n);
+  for (long long a = v[0] % mod, k = mod - 2; k > 0; k >>= 1, a = a * a % mod) if (k & 1) ret[0] = ret[0] * a % mod;
+  for (int w = 1; w < n; w <<= 1)
+  {
+    int fn = std::min(2 * w, n);
+    while (f.size() < fn) f.push_back(v[f.size()]);
+    auto res = convolution(f, ret);
+    res.resize(fn);
+    res[0] = (mod + 2 - res[0]) % mod;
+    for (int i = 1; i < res.size(); ++i) res[i] = (mod - res[i]) % mod;
+    ret = convolution(ret, res);
+    ret.resize(fn);
+  }
+  return ret;
+}
