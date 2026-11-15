@@ -152,3 +152,42 @@ std::vector<T> poly_mod(const std::vector<T> &a, const std::vector<T> &b)
   while (aa.size() > 1 && aa.back() == 0) aa.pop_back();
   return aa;
 }
+
+
+
+
+template<typename T>
+T fiduccia(const std::vector<T> &a, const std::vector<T> &c, long long k)
+{
+  const int mod = 1000000007;
+  std::vector<T> g(c.size() + 1);
+  g[c.size()] = 1;
+  for (int i = 0; i < c.size(); ++i) g[i] = -c[i] % mod + mod;
+  auto powmod = [&](auto f, long long r) -> std::vector<T>
+  {
+    std::vector<T> ret(c.size());
+    if (r < c.size())
+    {
+      ret[r] = 1;
+      return ret;
+    }
+    ret = f(f, r / 2);
+    ret = poly_mod(convolution(ret, ret), g);
+    ret.resize(c.size());
+    if (r & 1)
+    {
+      long long tmp = ret[c.size() - 1];
+      for (int i = ret.size() - 1; i > 0; --i) ret[i] = ret[i - 1];
+      ret[0] = 0;
+      if (tmp != 0)
+      {
+        for (int i = 0; i < c.size(); ++i) ret[i] = (ret[i] + tmp * c[i]) % mod;
+      }
+    }
+    return ret;
+  };
+  auto res = powmod(powmod, k);
+  T ans = 0;
+  for (int i = 0; i < c.size(); ++i) ans = (ans + res[i] * a[i]) % mod;
+  return ans;
+}
